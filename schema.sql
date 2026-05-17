@@ -3,3 +3,8 @@ CREATE TABLE notes (
   content TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Enable all for anon" ON notes
+  FOR ALL USING (true) WITH CHECK (true);

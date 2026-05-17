@@ -10,15 +10,19 @@ interface NoteInputProps {
 export default function NoteInput({ onSubmit }: NoteInputProps) {
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!content.trim()) return
 
     setLoading(true)
+    setError('')
     try {
       await onSubmit(content)
       setContent('')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Gagal menyimpan')
     } finally {
       setLoading(false)
     }
@@ -43,6 +47,9 @@ export default function NoteInput({ onSubmit }: NoteInputProps) {
           {loading ? 'Menyimpan...' : 'Tambah Note'}
         </button>
       </div>
+      {error && (
+        <p className="text-xs text-red-500">{error}</p>
+      )}
     </form>
   )
 }

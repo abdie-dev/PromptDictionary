@@ -1,10 +1,10 @@
-import { supabase } from '@/lib/supabase'
+import { getSupabase } from '@/lib/supabase'
 import NotesClient from './NotesClient'
 
 export const dynamic = 'force-dynamic'
 
 async function getNotes() {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('notes')
     .select('*')
     .order('created_at', { ascending: false })

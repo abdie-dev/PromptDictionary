@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import { getSupabase } from '@/lib/supabase'
 import NoteInput from '@/components/NoteInput'
 import NoteCard from '@/components/NoteCard'
 
@@ -19,19 +19,21 @@ export default function NotesClient({ initialNotes }: NotesClientProps) {
   const [notes, setNotes] = useState<Note[]>(initialNotes)
 
   const addNote = useCallback(async (content: string) => {
-    const { data } = await supabase
+    const { data, error } = await getSupabase()
       .from('notes')
       .insert({ content })
       .select()
       .single()
 
+    if (error) throw new Error(error.message)
     if (data) {
       setNotes(prev => [data, ...prev])
     }
   }, [])
 
   const deleteNote = useCallback(async (id: string) => {
-    await supabase.from('notes').delete().eq('id', id)
+    const { error } = await getSupabase().from('notes').delete().eq('id', id)
+    if (error) throw new Error(error.message)
     setNotes(prev => prev.filter(n => n.id !== id))
   }, [])
 
