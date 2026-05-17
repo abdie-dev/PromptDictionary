@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { getSupabase } from '@/lib/supabase'
 import NoteInput from '@/components/NoteInput'
 import NoteCard from '@/components/NoteCard'
@@ -11,12 +11,25 @@ interface Note {
   created_at: string
 }
 
-interface NotesClientProps {
-  initialNotes: Note[]
-}
+export default function NotesClient() {
+  const [notes, setNotes] = useState<Note[]>([])
+  const [loading, setLoading] = useState(true)
 
-export default function NotesClient({ initialNotes }: NotesClientProps) {
-  const [notes, setNotes] = useState<Note[]>(initialNotes)
+  const fetchNotes = useCallback(async () => {
+    const { data, error } = await getSupabase()
+      .from('notes')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (!error && data) {
+      setNotes(data)
+    }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    fetchNotes()
+  }, [fetchNotes])
 
   const addNote = useCallback(async (content: string) => {
     const { data, error } = await getSupabase()
@@ -51,7 +64,11 @@ export default function NotesClient({ initialNotes }: NotesClientProps) {
       <NoteInput onSubmit={addNote} />
 
       <section className="mt-8 space-y-3">
-        {notes.length === 0 ? (
+        {loading ? (
+          <p className="py-12 text-center text-sm text-zinc-400">
+            Memuat...
+          </p>
+        ) : notes.length === 0 ? (
           <p className="py-12 text-center text-sm text-zinc-400">
             Belum ada catatan
           </p>
